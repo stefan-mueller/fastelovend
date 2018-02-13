@@ -34,3 +34,4 @@ vignettes/*.pdf
 
 # Raw dataset (copyright reason)
 *.csv
+.Rproj.user
