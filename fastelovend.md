@@ -154,7 +154,7 @@ kwic(corpus_leeder, c("fiere*", "drink*", "alaaf"), window = 3)
     ##  [Denn wen, 1993, 144]      Kölle Alaaf, |  Alaaf  | - Kölle Alaaf      
     ##  [Denn wen, 1993, 147]      Alaaf- Kölle |  Alaaf  |
 
-Was sagt uns diese Tabelle: Die Kölner singen gerne über ihre Stadt und trinken ebenso gern. Und in vielen Texten wiederholt sich eine Phrase (Refrain!).
+Was sagt uns diese Tabelle: Die Kölner lieben das "Alaaf" und trinken sehr gerne. Und in vielen Texten wiederholt sich eine Phrase (Refrain!).
 
 Im nächsten Schritt plotten wir die 40 häufigsten Begriffe über alle Lieder hinweg.
 
@@ -175,12 +175,12 @@ ggplot(most_frequent_words, aes(x = reorder(feature, frequency), y = frequency))
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
-Wir sehen, dass dies vor allem "Stoppwörter" sind, die recht wenig Aussagekraft haben. Deshalb wiederholen wir das Ganze und entfernen Wörter, die in über 60 Prozent der Lieder vorkommen.
+Wir sehen, dass dies vor allem "Stoppwörter" sind, die recht wenig Aussagekraft haben. Deshalb wiederholen wir das Ganze und entfernen Wörter, die in über 80 Prozent der Lieder vorkommen.
 
 ``` r
 # Entferne Begriffe, die in mehr als 60 Prozent der Lieder vorkommen
 dfm_leeder_trim <- dfm_leeder %>% 
-    dfm_trim(max_docfreq = 0.6)
+    dfm_trim(max_docfreq = 0.8)
 
 # Plotte 40 häufigsten Begriffe
 most_frequent_words_subset <- textstat_frequency(dfm_leeder_trim, n = 40)
@@ -214,7 +214,7 @@ corpus_leeder_subset_wordcloud %>%
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
-Eins fällt auf: manche Lieder haben einen großen Einfluss, beispielsweise "Dausend Leeve" bei Kasalla, "Op de Maat" (Räuber), "Polka, Polka, Polka" (Bläck Fööss) und "Pizza Wunderbar" (Pizza). Denn die Inhalte dieser Lieder sind fundamental anders zu den Titeln der anderen Bands (und beinhalten sich wiederholende Schlagwörter).
+Eins fällt auf: manche Lieder haben einen großen Einfluss, beispielsweise "Dausend Levve" bei Kasalla, "Op de Maat" (Räuber), "Polka, Polka, Polka" (Bläck Fööss) und "Pizza Wunderbar" (Pizza). Denn die Inhalte dieser Lieder unterscheiden sich sehr von den Titeln der anderen Bands (und beinhalten sich wiederholende Schlagwörter).
 
 Wordfish für Karnevalsbands
 ---------------------------
@@ -236,13 +236,13 @@ textmodel_wordfish(dfm_leeder_subset) %>%
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
-Die Dimension macht aber durchaus Sinn: es geht um Platt vs. Hochdeutsch! Während Bands wie Miljö, Kasalla, Querbeat und Cat Ballou fast ausschließlich auf Kölsch singen (zumindest deren Songs in den Top 100), singen u.g. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd Stelter auf Hochdeutsch. Interessanterweise liegen Brings, Höhner und Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn! Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten.
+Die Dimension macht aber durchaus Sinn: es geht um platt vs. hochdeutsch! Während Bands wie Miljö, Kasalla, Querbeat und Cat Ballou fast ausschließlich auf kölsch singen (zumindest deren Songs in den Top 100), singen u.a. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd Stelter auf hochdeutsch. Interessanterweise liegen Brings, Höhner und Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn! Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten. Allerdings besteht diese Analyse nur aus 100, meist kurzen, Liedtexten. Um ein besseres Verständnis zu bekommen, brauchen wir mehr Lieder pro Band. Dann könnten wir auch besser verstehen, warum z.B. die Fööss nicht mehr in der kölsch-Dimension auftauchen. Mit der momentanen Analyse kann auch die unterschiedliche Textlänger (mehr Songs der Höhner, Bläck Fööss und Brings) einen Einfluss auf die Skalierung haben. Deshalb gilt auch hier: more research is required.
 
 Für mehr Informationen zu Wordfish siehe: Jonathan Slapin and Sven-Oliver Proksch. 2008. "[A Scaling Model for Estimating Time-Series Party Positions from Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)" American Journal of Political Science 52(3):705-772.
 
 Habe ich Interesse an unserem **quanteda**-Package geweckt? Hier gibt es mehr Informationen:
 
--   Website: [quanteda.io](www.quanteda.io)
--   Tutorials: [tutorials.quanteda.io](tutorials.quanteda.io)
+-   Website: [quanteda.io](http://www.quanteda.io)
+-   Tutorials: [tutorials.quanteda.io](http://tutorials.quanteda.io)
 
 Aus Urheberrechtsgründen habe ich den Rohdatensatz nicht öffentlich verfügbar gemacht.
