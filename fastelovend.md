@@ -178,7 +178,7 @@ ggplot(most_frequent_words, aes(x = reorder(feature, frequency), y = frequency))
 Wir sehen, dass dies vor allem "Stoppwörter" sind, die recht wenig Aussagekraft haben. Deshalb wiederholen wir das Ganze und entfernen Wörter, die in über 80 Prozent der Lieder vorkommen.
 
 ``` r
-# Entferne Begriffe, die in mehr als 60 Prozent der Lieder vorkommen
+# Entferne Begriffe, die in mehr als 80 Prozent der Lieder vorkommen
 dfm_leeder_trim <- dfm_leeder %>% 
     dfm_trim(max_docfreq = 0.8)
 
@@ -192,7 +192,7 @@ ggplot(most_frequent_words_subset, aes(x = reorder(feature, frequency), y = freq
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-Diese Auswahl ist vielsagender. Die Kölner sprechen gerne über sich ("mer", "ming", "sin") und ihre Stadt ("kölle", "kölsche", "stadt").
+Diese Auswahl ist etwas vielsagender. Die Kölner sprechen gerne über sich ("mer", "ming", "sin") und ihre Stadt ("kölle", "kölsche", "stadt"). Allerdings befinden sich unter den Worten immer noch viele Pronomen, Artikel und Füllwörter. Deshalb gehen wir im nächsten Abschnitt einen Schritt weiter und untersuchen, wie sich die Wortwahl der Interpreten unterscheidet.
 
 Wordclouds
 ----------
