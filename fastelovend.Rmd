@@ -85,6 +85,49 @@ data %>%
     knitr::kable()
 ```
 
+## Kölsch oder Hochdeutsch
+
+Sind die Top-Song seher auf kölsch oder hochdeutsch verfasst? Das können wir leicht rausfinden.
+
+```{r}
+ggplot(data, aes(x = Sprache)) +
+    geom_bar(width = 0.5) +
+    labs(x = NULL, y = "Prozent")
+```
+
+Kölsch überwiegt. Während 23 der 100 Songs auf hochdeutsch verfasst wurde, sind über drei Viertel der Lieder auf platt. In diesem Sinne: "[Su lang beim Lommi die Leechter noch brenne. Su lang ‘ne Funk weiß, wie Stippefott jeiht. Su lang dä Pitter noch schläht, dä Speimanes noch speit.
+Jo, su lang stirv dä Kölsche nit us.](https://www.youtube.com/watch?v=h31ksztZee4)"
+
+
+Nun das Ganze aufgeschlüsselt nach Bands mit über sechs Songs.
+
+```{r}
+data %>% 
+    filter(count_songs >= 6) %>% 
+    ggplot(aes(x = Sprache)) +
+    geom_bar(width = 0.5) +
+    facet_wrap(~Interpret) +
+    labs(x = NULL, y = "Prozent")
+```
+
+Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf platt verfasst haben, gefolgt von Brings. Die größte Mischung aus Liedern auf platt und hochdeutsch haben Brings.
+
+Haben kölsche Songs eine höhere Wahrscheinlichkeit mehr Aufrufe zu erhalten? Wir nutzen einen so genannte t-test und visualisieren die Verteilung als Boxplots.
+
+
+```{r}
+t.test(Rang ~ Sprache, data = data)
+```
+
+```{r}
+ggplot(data = data, aes(x = Sprache, y = Rang)) + 
+    geom_boxplot() +
+   ggbeeswarm::geom_quasirandom(alpha = 0.9) +
+    labs(x = NULL, y = "Position in Top 100")
+```
+
+Jeder Punkt zeigt ein Lied. Der Boxplot zeigt den Median-Wert beider Kategorien und den so genannte Quartilsabstand. Kölsche Songs haben einen geringeren Medianwert, was darauf schließen lässt, dass kölsche Lieder weiter Oben auf der Liste stehen. Der obige T-test zeigt jedoch, dass der Unterschied nicht statistisch signifikant ist. 
+
 
 ## Quantitative Textanalyse
 
@@ -155,6 +198,7 @@ corpus_leeder_subset_wordcloud <- corpus_leeder %>%
     corpus_subset(count_songs > 6)
 
 # Erstelle Wordcloud
+set.seed(1111)
 corpus_leeder_subset_wordcloud %>% 
     dfm(remove = stopwords("german")) %>% 
     dfm_group(groups = docvars(corpus_leeder_subset_wordcloud, "Interpret")) %>%
@@ -184,6 +228,49 @@ textmodel_wordfish(dfm_leeder_subset) %>%
 Die Dimension macht aber durchaus Sinn: es geht um platt vs. hochdeutsch! Während Bands wie Miljö, Kasalla, Querbeat und Cat Ballou fast ausschließlich auf kölsch singen (zumindest deren Songs in den Top 100), singen u.a. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd Stelter auf hochdeutsch. Interessanterweise liegen Brings, Höhner und Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn! Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten. Allerdings besteht diese Analyse nur aus 100, meist kurzen, Liedtexten. Um ein besseres Verständnis zu bekommen, brauchen wir mehr Lieder pro Band. Dann  könnten wir auch besser verstehen, warum z.B. die Fööss nicht mehr in der kölsch-Dimension auftauchen. Mit der momentanen Analyse kann auch die unterschiedliche Textlänger (mehr Songs der Höhner, Bläck Fööss und Brings) einen Einfluss auf die Skalierung haben. Deshalb gilt auch hier: more research is required.
 
 Für mehr Informationen zu Wordfish siehe: Jonathan Slapin and Sven-Oliver Proksch. 2008. "[A Scaling Model for Estimating Time-Series Party Positions from Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)" American Journal of Political Science 52(3):705-772.
+
+
+## Eine automatische Dialekt-Klassifikation
+
+Ist es möglich, anhand der Worthäufigkeiten automatisch zu ermitteln, ob ein Lied auf hochdeutsch oder kölsch verfasst ist? Um das herauszufinden, habe ich einen Naive Bayes-Klassifizierer erstellt. Die Idee ist einfach: Für die ersten 50 Songs nennen wir die Sprache und ermitteln, wie gut die automatische Klassifikation für die restlichen Titel funktioniert. 
+
+```{r}
+# Splitte Daten in Training- und Testset
+corpus_training <- data[1:50, ] %>% 
+    corpus()
+
+corpus_test <- data[51:100, ] %>% 
+    corpus()
+
+dfm_training <- dfm(corpus_training)
+
+nb_classifier <- textmodel_nb(dfm_training, docvars(corpus_training, "Sprache"))
+
+summary(nb_classifier)
+```
+
+Die "Estimated Feature Scores" zeigen uns die Wahrscheinlichkeit für jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört. Beispielsweise ist der Unterschied bei "oh" sehr ering (52-prozentige Wahrscheinlichekeit für "Kölsch", 47-prozentige Wahrscheinlichkeit für "Hochdeutsch"). Auf der anderen Seite haben Worte wie "dat", "wor", "nit" eine viel höhere Wahrscheinlichkeit, in kölschen Liedern vorzukommen. Diese Informationen werden genutzt, um die Sprache der restlichen Lieder vorherzusagen.
+
+```{r}
+# Erstelle Test-dfm
+dfm_test <- dfm(corpus_test)
+
+# Nimm nur Worte, die sowohl im Test- als auch im Trainingset existieren
+dfm_test_select <- dfm_select(dfm_test, dfm_training)
+
+# Wende Klassifikation an
+nb_predict <- predict(nb_classifier, dfm_test_select)
+
+# Checke, wie gut die Klassifikation geklappt hat
+table(actual_language = docvars(corpus_test, "Sprache"),
+      predicted_language = nb_predict$nb.predicted)
+
+```
+
+
+Die Klassifikation klappt perfekt! Mit nur 50 annotierten Liedern kann die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden!
+
+## Weiterführende Informationen
 
 Habe ich Interesse an unserem **quanteda**-Package geweckt? Hier gibt es mehr Informationen:
 
