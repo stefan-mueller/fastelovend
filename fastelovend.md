@@ -116,7 +116,7 @@ data %>%
     ggplot(aes(x = Sprache)) +
     geom_bar(width = 0.5) +
     facet_wrap(~Interpret, scales = "free_x") +
-    labs(x = NULL, y = "Anzahl and Liedern")
+    labs(x = NULL, y = "Anzahl an Liedern")
 ```
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-7-1.png)
