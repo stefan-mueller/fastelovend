@@ -108,8 +108,8 @@ data %>%
     filter(count_songs >= 6) %>% 
     ggplot(aes(x = Sprache)) +
     geom_bar(width = 0.5) +
-    facet_wrap(~Interpret) +
-    labs(x = NULL, y = "Prozent")
+    facet_wrap(~Interpret, scales = "free_x") +
+    labs(x = NULL, y = "Anzahl and Liedern")
 ```
 
 Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf platt verfasst haben, gefolgt von Brings. Die größte Mischung aus Liedern auf platt und hochdeutsch haben Brings.

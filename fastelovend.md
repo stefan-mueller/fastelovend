@@ -115,8 +115,8 @@ data %>%
     filter(count_songs >= 6) %>% 
     ggplot(aes(x = Sprache)) +
     geom_bar(width = 0.5) +
-    facet_wrap(~Interpret) +
-    labs(x = NULL, y = "Prozent")
+    facet_wrap(~Interpret, scales = "free_x") +
+    labs(x = NULL, y = "Anzahl and Liedern")
 ```
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-7-1.png)
