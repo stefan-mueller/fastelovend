@@ -4,6 +4,9 @@ Stefan Müller
 
 Die Website [karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html) hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube gespielten kölschen Karnevalslieder zu suchen. Die Tabelle findet sich [hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige ich, welche Bands am häufigsten vertreten sind und wie sich die Wortwahl unterscheidet (und gebe gleichzeitig noch einen Einblick in quantitative Textanalyse mit unserem [**quanteda**-Package](www.quanteda.io) sowie data wrangling und plotting mit der [**tidyverse**](www.tidyverse.org)).
 
+Beschreibende Statistiken
+-------------------------
+
 Dies sind die Top-10 Songs basierend auf den Youtube-Aufrufen:
 
 ``` r
@@ -90,8 +93,8 @@ data %>%
 |  1970|    79| Margit Sponheimer | Am Rosenmontag bin ich geboren            |
 |  1971|    16| Bläck Fööss       | Drink doch eine met                       |
 
-Kölsch oder Hochdeutsch
------------------------
+Kölsch oder Hochdeutsch?
+------------------------
 
 Sind die Top-Song seher auf kölsch oder hochdeutsch verfasst? Das können wir leicht rausfinden.
 
@@ -141,13 +144,82 @@ t.test(Rang ~ Sprache, data = data)
 ``` r
 ggplot(data = data, aes(x = Sprache, y = Rang)) + 
     geom_boxplot() +
-   ggbeeswarm::geom_quasirandom(alpha = 0.9) +
+    scale_y_reverse() + 
+    ggbeeswarm::geom_quasirandom(alpha = 0.9) +
     labs(x = NULL, y = "Position in Top 100")
 ```
 
 ![](fastelovend_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-Jeder Punkt zeigt ein Lied. Der Boxplot zeigt den Median-Wert beider Kategorien und den so genannte Quartilsabstand. Kölsche Songs haben einen geringeren Medianwert, was darauf schließen lässt, dass kölsche Lieder weiter Oben auf der Liste stehen. Der obige T-test zeigt jedoch, dass der Unterschied nicht statistisch signifikant ist.
+Jeder Punkt markiert ein Lied. Der Boxplot zeigt den Median-Wert beider Kategorien und den so genannte Quartilsabstand (in diesem Bereich liegen 50 Prozent der Songs in der jeweiligen Kategorie). Kölsche Songs haben einen geringeren Medianwert, was darauf schließen lässt, dass kölsche Lieder weiter Oben auf der Liste stehen. Der obige T-test zeigt jedoch, dass der Unterschied nicht statistisch signifikant ist.
+
+Eine automatische Dialekt-Klassifikation
+----------------------------------------
+
+Ist es möglich, anhand der Worthäufigkeiten automatisch zu ermitteln, ob ein Lied auf hochdeutsch oder kölsch verfasst ist? Um das herauszufinden, habe ich einen Naive Bayes-Klassifizierer erstellt. Die Idee ist einfach: Für die ersten 50 Songs nennen wir die Sprache und ermitteln, wie gut die automatische Klassifikation für die restlichen Titel funktioniert.
+
+``` r
+# Splitte Daten in Training- und Testset
+corpus_training <- data[1:50, ] %>% 
+    corpus()
+
+corpus_test <- data[51:100, ] %>% 
+    corpus()
+
+dfm_training <- dfm(corpus_training)
+
+nb_classifier <- textmodel_nb(dfm_training, docvars(corpus_training, "Sprache"))
+
+summary(nb_classifier)
+```
+
+    ## 
+    ## Call:
+    ## textmodel_nb.dfm(x = dfm_training, y = docvars(corpus_training, 
+    ##     "Sprache"))
+    ## 
+    ## Class Priors:
+    ## (showing first 2 elements)
+    ##      Kölsch Hochdeutsch 
+    ##         0.5         0.5 
+    ## 
+    ## Estimated Feature Scores:
+    ##                 oh      , yeah-oh deutschunterricht    dat   wor    nix
+    ## Kölsch      0.5247 0.7193  0.7815            0.4429 0.9014 0.893 0.8774
+    ## Hochdeutsch 0.4753 0.2807  0.2185            0.5571 0.0986 0.107 0.1226
+    ##                för   mich   dann    ming sproch    die    jof     et
+    ## Kölsch      0.6925 0.5439 0.6693 0.93633 0.8267 0.5302 0.4429 0.9238
+    ## Hochdeutsch 0.3075 0.4561 0.3307 0.06367 0.1733 0.4698 0.5571 0.0762
+    ##                 do    nit      „ sprech ödentlich      !      "   hät
+    ## Kölsch      0.8361 0.8873 0.6139 0.5439    0.4429 0.7185 0.8267 0.799
+    ## Hochdeutsch 0.1639 0.1127 0.3861 0.4561    0.5571 0.2815 0.1733 0.201
+    ##                 de    mam jesaht     di zeuchniss   weed   kene
+    ## Kölsch      0.8857 0.6652 0.4429 0.7046    0.4429 0.8564 0.4429
+    ## Hochdeutsch 0.1143 0.3348 0.5571 0.2954    0.5571 0.1436 0.5571
+
+Die "Estimated Feature Scores" zeigen uns die Wahrscheinlichkeit für jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört. Beispielsweise ist der Unterschied bei "oh" sehr ering (52-prozentige Wahrscheinlichekeit für "Kölsch", 47-prozentige Wahrscheinlichkeit für "Hochdeutsch"). Auf der anderen Seite haben Worte wie "dat", "wor", "nit" eine viel höhere Wahrscheinlichkeit, in kölschen Liedern vorzukommen. Diese Informationen werden genutzt, um die Sprache der restlichen Lieder vorherzusagen.
+
+``` r
+# Erstelle Test-dfm
+dfm_test <- dfm(corpus_test)
+
+# Nimm nur Worte, die sowohl im Test- als auch im Trainingset existieren
+dfm_test_select <- dfm_select(dfm_test, dfm_training)
+
+# Wende Klassifikation an
+nb_predict <- predict(nb_classifier, dfm_test_select)
+
+# Checke, wie gut die Klassifikation geklappt hat
+table(actual_language = docvars(corpus_test, "Sprache"),
+      predicted_language = nb_predict$nb.predicted)
+```
+
+    ##                predicted_language
+    ## actual_language Hochdeutsch Kölsch
+    ##     Hochdeutsch          18      0
+    ##     Kölsch                0     32
+
+Die Klassifikation klappt perfekt! Mit nur 50 annotierten Liedern kann die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden!
 
 Quantitative Textanalyse
 ------------------------
@@ -232,7 +304,7 @@ ggplot(most_frequent_words, aes(x = reorder(feature, frequency), y = frequency))
     labs(x = NULL, y = "Häufigkeit")
 ```
 
-![](fastelovend_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 Wir sehen, dass dies vor allem "Stoppwörter" sind, die recht wenig Aussagekraft haben. Deshalb wiederholen wir das Ganze und entfernen Wörter, die in über 80 Prozent der Lieder vorkommen.
 
@@ -249,7 +321,7 @@ ggplot(most_frequent_words_subset, aes(x = reorder(feature, frequency), y = freq
     labs(x = NULL, y = "Häufigkeit (ohne Stoppwörter)")
 ```
 
-![](fastelovend_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
 Diese Auswahl ist etwas vielsagender. Die Kölner sprechen gerne über sich ("mer", "ming", "sin") und ihre Stadt ("kölle", "kölsche", "stadt"). Allerdings befinden sich unter den Worten immer noch viele Pronomen, Artikel und Füllwörter. Deshalb gehen wir im nächsten Abschnitt einen Schritt weiter und untersuchen, wie sich die Wortwahl der Interpreten unterscheidet.
 
@@ -272,7 +344,7 @@ corpus_leeder_subset_wordcloud %>%
     textplot_wordcloud(comparison = TRUE, max.words = 100)
 ```
 
-![](fastelovend_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
 Eins fällt auf: manche Lieder haben einen großen Einfluss, beispielsweise "Dausend Levve" bei Kasalla, "Op de Maat" (Räuber), "Polka, Polka, Polka" (Bläck Fööss) und "Pizza Wunderbar" (Pizza). Denn die Inhalte dieser Lieder unterscheiden sich sehr von den Titeln der anderen Bands (und beinhalten sich wiederholende Schlagwörter).
 
@@ -294,79 +366,11 @@ textmodel_wordfish(dfm_leeder_subset) %>%
     theme_minimal()
 ```
 
-![](fastelovend_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-17-1.png)
 
 Die Dimension macht aber durchaus Sinn: es geht um platt vs. hochdeutsch! Während Bands wie Miljö, Kasalla, Querbeat und Cat Ballou fast ausschließlich auf kölsch singen (zumindest deren Songs in den Top 100), singen u.a. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd Stelter auf hochdeutsch. Interessanterweise liegen Brings, Höhner und Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn! Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten. Allerdings besteht diese Analyse nur aus 100, meist kurzen, Liedtexten. Um ein besseres Verständnis zu bekommen, brauchen wir mehr Lieder pro Band. Dann könnten wir auch besser verstehen, warum z.B. die Fööss nicht mehr in der kölsch-Dimension auftauchen. Mit der momentanen Analyse kann auch die unterschiedliche Textlänger (mehr Songs der Höhner, Bläck Fööss und Brings) einen Einfluss auf die Skalierung haben. Deshalb gilt auch hier: more research is required.
 
 Für mehr Informationen zu Wordfish siehe: Jonathan Slapin and Sven-Oliver Proksch. 2008. "[A Scaling Model for Estimating Time-Series Party Positions from Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)" American Journal of Political Science 52(3):705-772.
-
-Eine automatische Dialekt-Klassifikation
-----------------------------------------
-
-Ist es möglich, anhand der Worthäufigkeiten automatisch zu ermitteln, ob ein Lied auf hochdeutsch oder kölsch verfasst ist? Um das herauszufinden, habe ich einen Naive Bayes-Klassifizierer erstellt. Die Idee ist einfach: Für die ersten 50 Songs nennen wir die Sprache und ermitteln, wie gut die automatische Klassifikation für die restlichen Titel funktioniert.
-
-``` r
-# Splitte Daten in Training- und Testset
-corpus_training <- data[1:50, ] %>% 
-    corpus()
-
-corpus_test <- data[51:100, ] %>% 
-    corpus()
-
-dfm_training <- dfm(corpus_training)
-
-nb_classifier <- textmodel_nb(dfm_training, docvars(corpus_training, "Sprache"))
-
-summary(nb_classifier)
-```
-
-    ## 
-    ## Call:
-    ## textmodel_nb.dfm(x = dfm_training, y = docvars(corpus_training, 
-    ##     "Sprache"))
-    ## 
-    ## Class Priors:
-    ## (showing first 2 elements)
-    ##      Kölsch Hochdeutsch 
-    ##         0.5         0.5 
-    ## 
-    ## Estimated Feature Scores:
-    ##                 oh      , yeah-oh deutschunterricht    dat   wor    nix
-    ## Kölsch      0.5247 0.7193  0.7815            0.4429 0.9014 0.893 0.8774
-    ## Hochdeutsch 0.4753 0.2807  0.2185            0.5571 0.0986 0.107 0.1226
-    ##                för   mich   dann    ming sproch    die    jof     et
-    ## Kölsch      0.6925 0.5439 0.6693 0.93633 0.8267 0.5302 0.4429 0.9238
-    ## Hochdeutsch 0.3075 0.4561 0.3307 0.06367 0.1733 0.4698 0.5571 0.0762
-    ##                 do    nit      „ sprech ödentlich      !      "   hät
-    ## Kölsch      0.8361 0.8873 0.6139 0.5439    0.4429 0.7185 0.8267 0.799
-    ## Hochdeutsch 0.1639 0.1127 0.3861 0.4561    0.5571 0.2815 0.1733 0.201
-    ##                 de    mam jesaht     di zeuchniss   weed   kene
-    ## Kölsch      0.8857 0.6652 0.4429 0.7046    0.4429 0.8564 0.4429
-    ## Hochdeutsch 0.1143 0.3348 0.5571 0.2954    0.5571 0.1436 0.5571
-
-Die "Estimated Feature Scores" zeigen uns die Wahrscheinlichkeit für jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört. Beispielsweise ist der Unterschied bei "oh" sehr ering (52-prozentige Wahrscheinlichekeit für "Kölsch", 47-prozentige Wahrscheinlichkeit für "Hochdeutsch"). Auf der anderen Seite haben Worte wie "dat", "wor", "nit" eine viel höhere Wahrscheinlichkeit, in kölschen Liedern vorzukommen. Diese Informationen werden genutzt, um die Sprache der restlichen Lieder vorherzusagen.
-
-``` r
-# Erstelle Test-dfm
-dfm_test <- dfm(corpus_test)
-
-# Nimm nur Worte, die sowohl im Test- als auch im Trainingset existieren
-dfm_test_select <- dfm_select(dfm_test, dfm_training)
-
-# Wende Klassifikation an
-nb_predict <- predict(nb_classifier, dfm_test_select)
-
-# Checke, wie gut die Klassifikation geklappt hat
-table(actual_language = docvars(corpus_test, "Sprache"),
-      predicted_language = nb_predict$nb.predicted)
-```
-
-    ##                predicted_language
-    ## actual_language Hochdeutsch Kölsch
-    ##     Hochdeutsch          18      0
-    ##     Kölsch                0     32
-
-Die Klassifikation klappt perfekt! Mit nur 50 annotierten Liedern kann die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden!
 
 Weiterführende Informationen
 ----------------------------
