@@ -451,11 +451,9 @@ American Journal of Political Science 52(3):705-772.
 Habe ich Interesse an unserem **quanteda**-Package geweckt? Hier gibt es
 mehr Informationen:
 
-  - Website: [quanteda.io](http://www.quanteda.io)
-  - Tutorials: [tutorials.quanteda.io](http://tutorials.quanteda.io)
-
-Aus Urheberrechtsgründen habe ich den Rohdatensatz nicht öffentlich
-verfügbar gemacht.
+  - Website: [quanteda.io](https://www.quanteda.io)
+  - Tutorials: [tutorials.quanteda.io](https://tutorials.quanteda.io)
+  - Quanteda Initiative: [quanteda.org](https://tutorials.org)
 
 Die folgende Version von **quanteda** wurde für diese aktualisierte
 Version der Einführung genutzt.
