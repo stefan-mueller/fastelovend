@@ -8,7 +8,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Die Website [karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html) hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube gespielten kölschen Karnevalslieder zu suchen. Die Tabelle findet sich [hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige ich, welche Bands am häufigsten vertreten sind und wie sich die Wortwahl unterscheidet (und gebe gleichzeitig noch einen Einblick in quantitative Textanalyse mit unserem [**quanteda**-Package](www.quanteda.io) sowie data wrangling und plotting mit der [**tidyverse**](www.tidyverse.org)).
+Die Website [karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html) hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube gespielten kölschen Karnevalslieder zu finden Die Tabelle findet sich [hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige ich, welche Bands am häufigsten vertreten sind, wie sich die Wortwahl unterscheidet, und ob man mitteils eines "trainierten" Klassifikator ermitteln kann, ob ein Song auf hochdeutsch oder kölsch geschrieben wurde. Gleichzeitig gebe gleichzeitig noch einen Einblick in quantitative Textanalyse mit unserem [**quanteda**](www.quanteda.io)-Package. Visualisierungen und Data Wrangling wurde mit der [**tidyverse**](www.tidyverse.org) durchgeführt.
 
 ## Beschreibende Statistiken 
 
@@ -18,7 +18,7 @@ library(tidyverse)
 library(knitr)
 library(quanteda)
 
-ggplot2::theme_set(theme_minimal())
+ggplot2::theme_set(theme_minimal(base_size = 14))
 
 # Lade Datensatz
 data <- read_csv("koelsche_songs.csv") %>%
@@ -41,9 +41,8 @@ Für alle Nicht-Karnvelisten: Das hier ist Numero Uno: https://www.youtube.com/w
 
 Im nächsten Schritt analysieren wir, welche Bands die meisten Songs unter den Youtube-Top-100 haben.
 
-
 ```{r}
-# Berechne die Anzahl der Top 100-Liedern pro Interpret
+# Berechne die Anzahl der Top 100-Lieder pro Interpret
 data_by_artist <- data %>% 
     group_by(Interpret) %>% 
     summarise(number_songs = n()) %>% 
@@ -51,11 +50,11 @@ data_by_artist <- data %>%
 
 # Erstelle Plot
 ggplot(data_by_artist, aes(x = reorder(Interpret, number_songs), y = number_songs)) + 
-    geom_point(stat = "identity", size = 2) +
+    geom_bar(stat = "identity", width = 0.1) +
+    geom_point(size = 2) +
     scale_y_continuous(limits = c(0, 12), breaks = c(seq(0, 12, 2))) +
     coord_flip() +
     labs(x = NULL, y = "Anzahl an Titeln unter Top 100")
-
 ```
 
 Wie zu erwarten, teilen sich die "Fööss", Höhner und Brings Platz 1 mit jeweils 12 Liedern. Im nächsten Schritt schauen wir, aus welchen Jahren die Lieder stammen. Da das Yotube-Publikum generell jünger ist und viele der alten Klassiker (leider) womöglich nicht kennt, ist es zu vermuten, dass die meisten Songs aus den letzten 10-15 Jahren stammen.
@@ -68,10 +67,10 @@ data_by_year <- data %>%
 
 # Erstelle Plot
 ggplot(data_by_year, aes(x = Jahr, y = number_songs)) + 
-    geom_bar(stat = "identity", size = 2) +
+    geom_bar(stat = "identity", width = 0.5) +
     scale_x_continuous(limits = c(1930, 2020), breaks = c(seq(1930, 2020, 20))) +
     scale_y_continuous(limits = c(0, 12), breaks = c(seq(0, 12, 2))) +
-    labs(x = "Jahr", y = "Anzahl an Titeln")
+    labs(x = "Jahr", y = "Lieder")
 ```
 
 
@@ -106,15 +105,16 @@ Nun das Ganze aufgeschlüsselt nach Bands mit über sechs Songs.
 ```{r}
 data %>% 
     filter(count_songs >= 6) %>% 
-    ggplot(aes(x = Sprache)) +
-    geom_bar(width = 0.5) +
-    facet_wrap(~Interpret, scales = "free_x") +
-    labs(x = NULL, y = "Anzahl an Liedern")
+    ggplot(aes(x = Interpret, fill = Sprache)) +
+    geom_bar(width = 0.2, position = position_dodge(width = 0.3)) +
+    labs(x = NULL, y = "Lieder") + 
+    coord_flip() +
+    guides(fill = guide_legend(reverse=T))
 ```
 
-Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf platt verfasst haben, gefolgt von Brings. Die größte Mischung aus Liedern auf platt und hochdeutsch haben Brings.
+Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf platt verfasst haben, gefolgt von den Bläck Fööss Die größte Mischung aus Liedern auf platt und hochdeutsch haben Brings.
 
-Haben kölsche Songs eine höhere Wahrscheinlichkeit mehr Aufrufe zu erhalten? Wir nutzen einen so genannte t-test und visualisieren die Verteilung als Boxplots.
+Haben kölsche Songs eine höhere Wahrscheinlichkeit mehr Aufrufe zu erhalten? Wir nutzen einen so genannten [t-test](https://en.wikipedia.org/wiki/Student's_t-test) und visualisieren die Verteilung als Boxplots.
 
 
 ```{r}
@@ -123,9 +123,9 @@ t.test(Rang ~ Sprache, data = data)
 
 ```{r}
 ggplot(data = data, aes(x = Sprache, y = Rang)) + 
-    geom_boxplot() +
+    geom_boxplot(width = 0.3, colour = "red") +
     scale_y_reverse() + 
-    ggbeeswarm::geom_quasirandom(alpha = 0.9) +
+    ggbeeswarm::geom_quasirandom(alpha = 0.9, width = 0.1) +
     labs(x = NULL, y = "Position in Top 100")
 ```
 
@@ -151,7 +151,7 @@ nb_classifier <- textmodel_nb(dfm_training, docvars(corpus_training, "Sprache"))
 summary(nb_classifier)
 ```
 
-Die "Estimated Feature Scores" zeigen uns die Wahrscheinlichkeit für jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört. Beispielsweise ist der Unterschied bei "oh" sehr ering (52-prozentige Wahrscheinlichekeit für "Kölsch", 47-prozentige Wahrscheinlichkeit für "Hochdeutsch"). Auf der anderen Seite haben Worte wie "dat", "wor", "nit" eine viel höhere Wahrscheinlichkeit, in kölschen Liedern vorzukommen. Diese Informationen werden genutzt, um die Sprache der restlichen Lieder vorherzusagen.
+Die "Estimated Feature Scores" zeigen uns die Wahrscheinlichkeit für jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört. Beispielsweise ist der Unterschied bei "oh" sehr gering (52-prozentige Wahrscheinlichekeit für "Kölsch", 47-prozentige Wahrscheinlichkeit für "Hochdeutsch"). Auf der anderen Seite haben Worte wie "dat", "wor", "nit" eine viel höhere Wahrscheinlichkeit, in kölschen Liedern vorzukommen. Diese Informationen werden genutzt, um die Sprache der restlichen Lieder vorherzusagen.
 
 ```{r}
 # Erstelle Test-dfm
@@ -165,7 +165,7 @@ nb_predict <- predict(nb_classifier, dfm_test_select)
 
 # Checke, wie gut die Klassifikation geklappt hat
 table(actual_language = docvars(corpus_test, "Sprache"),
-      predicted_language = nb_predict$nb.predicted)
+       predicted_language = nb_predict)
 
 ```
 
@@ -187,19 +187,21 @@ docnames(corpus_leeder) <- paste(docvars(corpus_leeder, "title_short"),
                                  docvars(corpus_leeder, "Jahr"), sep = ", ")
 ```
 
-Nun nutzen wir die Keyword-in-Context-Funktion, um zu schauen, in welchen Zusammenhängen die Worte "fiere", "drink" und "alaaf" vorkommen. Hierbei wird nicht zwischen Groß- und Kleinschreibung unterschieden. 
+Nun nutzen wir die Keyword-in-Context-Funktion, um zu schauen, in welchen Zusammenhängen die Worte "fiere", "drink" und "alaaf" vorkommen. Hierbei wird nicht zwischen Groß- und Kleinschreibung unterschieden.
 
 
 ```{r}
 # Keyword-in-Context-Analyse
-kwic(corpus_leeder, c("fiere*", "drink*", "alaaf"), window = 3)
+corpus_leeder %>% 
+    tokens(remove_punct = TRUE) %>% 
+    kwic(c("fiere*", "drink*", "alaaf"), window = 2)
 ```
 
 Was sagt uns diese Tabelle: Die Kölner lieben das "Alaaf" und trinken sehr gerne. Und in vielen Texten wiederholt sich eine Phrase (Refrain!).
 
 Im nächsten Schritt plotten wir die 40 häufigsten Begriffe über alle Lieder hinweg. 
 
-```{r}
+```{r, fig.height=8}
 # Erstelle dfm, entferne deutsche Stopwörter, Nummern und Punktuation
 dfm_leeder <- dfm(corpus_leeder,
                   remove = stopwords("german"),
@@ -215,39 +217,24 @@ ggplot(most_frequent_words, aes(x = reorder(feature, frequency), y = frequency))
 ```
 
 
-Wir sehen, dass dies vor allem "Stoppwörter" sind, die recht wenig Aussagekraft haben. Deshalb wiederholen wir das Ganze und entfernen Wörter, die in über 80 Prozent der Lieder vorkommen. 
-
-```{r}
-# Entferne Begriffe, die in mehr als 80 Prozent der Lieder vorkommen
-dfm_leeder_trim <- dfm_leeder %>% 
-    dfm_trim(max_docfreq = 0.8)
-
-# Plotte 40 häufigsten Begriffe
-most_frequent_words_subset <- textstat_frequency(dfm_leeder_trim, n = 40)
-ggplot(most_frequent_words_subset, aes(x = reorder(feature, frequency), y = frequency)) +
-    geom_point() + 
-    coord_flip() +
-    labs(x = NULL, y = "Häufigkeit (ohne Stoppwörter)")
-```
-
-Diese Auswahl ist etwas vielsagender. Die Kölner sprechen gerne über sich ("mer", "ming", "sin") und ihre Stadt ("kölle", "kölsche", "stadt"). Allerdings befinden sich unter den Worten immer noch viele Pronomen, Artikel und Füllwörter. Deshalb gehen wir im nächsten Abschnitt einen Schritt weiter und untersuchen, wie sich die Wortwahl der Interpreten unterscheidet.
+Die Kölner sprechen gerne über sich ("mer", "ming", "sin") und ihre Stadt ("kölle", "kölsche", "stadt"). Allerdings befinden sich unter den Worten immer noch viele Pronomen, Artikel und Füllwörter. Deshalb gehen wir im nächsten Abschnitt einen Schritt weiter und untersuchen, wie sich die Wortwahl der Interpreten unterscheidet.
 
 ## Wordclouds
 
 Als nächstes fokussieren wir uns auf die Interpreten, die mit mindestens sechs Titeln vertreten sind und erstellen eine Wordcloud basierend auf den [tf-idf-Werten](https://de.wikipedia.org/wiki/Tf-idf-Maß). Grob gesprochen stellt tf-idf diejenigen Begriffe hervor, die von dem jeweiligen Interpreten überproportional vorkommen (verglichen mit allen anderen Interpreten). 
 
-```{r, fig.width=10, fig.height=10}
+```{r, fig.width=10, fig.height=10, warning=FALSE}
 # Nur Gruppen mit mehr als sechs Liedern
 corpus_leeder_subset_wordcloud <- corpus_leeder %>% 
     corpus_subset(count_songs > 6)
 
 # Erstelle Wordcloud
-set.seed(1111)
+set.seed(111)
 corpus_leeder_subset_wordcloud %>% 
     dfm(remove = stopwords("german")) %>% 
     dfm_group(groups = docvars(corpus_leeder_subset_wordcloud, "Interpret")) %>%
     dfm_tfidf() %>% 
-    textplot_wordcloud(comparison = TRUE, max.words = 100)
+    textplot_wordcloud(comparison = TRUE, max_words = 70)
 ```
 
 Eins fällt auf: manche Lieder haben einen großen Einfluss, beispielsweise "Dausend Levve" bei Kasalla, "Op de Maat" (Räuber), "Polka, Polka, Polka" (Bläck Fööss) und "Pizza Wunderbar" (Pizza). Denn die Inhalte dieser Lieder unterscheiden sich sehr von den Titeln der anderen Bands (und beinhalten sich wiederholende Schlagwörter).
@@ -265,7 +252,7 @@ dfm_leeder_subset <- corpus_leeder_subset %>%
     dfm_group(groups = docvars(corpus_leeder_subset, "Interpret"))
 
 textmodel_wordfish(dfm_leeder_subset) %>% 
-    textplot_scale1d() +
+    textplot_scale1d(margin = "documents") +
     theme_minimal()
 ```
 
@@ -281,4 +268,11 @@ Habe ich Interesse an unserem **quanteda**-Package geweckt? Hier gibt es mehr In
 - Tutorials: [tutorials.quanteda.io](http://tutorials.quanteda.io)
 
 Aus Urheberrechtsgründen habe ich den Rohdatensatz nicht öffentlich verfügbar gemacht.
+
+Die folgende Version von **quanteda** wurde für diese aktualisierte Version der Einführung genutzt.
+
+```{r}
+cat(paste("Dieses Tutorium wurde mit quanteda Version", 
+    packageVersion("quanteda"), "erstellt."))
+```
 
