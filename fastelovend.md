@@ -1,24 +1,11 @@
-Eine quantitative Textanalyse der 100 beliebtesten kölschen
-Karnevalslieder
+Eine quantitative Textanalyse der 100 beliebtesten kölschen Karnevalslieder
 ================
 Stefan Müller
 
-Die Website
-[karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html)
-hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube
-gespielten kölschen Karnevalslieder zu finden Die Tabelle findet sich
-[hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und
-quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus
-erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige
-ich, welche Bands am häufigsten vertreten sind, wie sich die Wortwahl
-unterscheidet, und ob man mitteils eines “trainierten” Klassifikator
-ermitteln kann, ob ein Song auf hochdeutsch oder kölsch geschrieben
-wurde. Gleichzeitig gebe gleichzeitig noch einen Einblick in
-quantitative Textanalyse mit unserem
-[**quanteda**](www.quanteda.io)-Package. Visualisierungen und Data
-Wrangling wurde mit der [**tidyverse**](www.tidyverse.org) durchgeführt.
+Die Website [karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html) hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube gespielten kölschen Karnevalslieder zu finden Die Tabelle findet sich [hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige ich, welche Bands am häufigsten vertreten sind, wie sich die Wortwahl unterscheidet, und ob man mitteils eines "trainierten" Klassifikators ermitteln kann, ob ein Song auf hochdeutsch oder kölsch geschrieben wurde. Gleichzeitig gebe gleichzeitig noch einen Einblick in quantitative Textanalyse mit unserem [**quanteda**](www.quanteda.io)-Package. Visualisierungen und Data Wrangling wurde mit der [**tidyverse**](www.tidyverse.org) durchgeführt.
 
-## Beschreibende Statistiken
+Beschreibende Statistiken
+-------------------------
 
 Dies sind die Top-10 Songs basierend auf den Youtube-Aufrufen:
 
@@ -29,24 +16,22 @@ data %>%
     knitr::kable()
 ```
 
-| Rang | Interpret                               | Titel                     | Jahr |
-| ---: | :-------------------------------------- | :------------------------ | ---: |
-|    1 | Brings                                  | Kölsche Jung              | 2013 |
-|    2 | Kasalla                                 | Pirate                    | 2011 |
-|    3 | Cat Ballou                              | Et jitt kei Wood          | 2012 |
-|    4 | Trude Herr                              | Ich will keine Schokolade | 1965 |
-|    5 | Brings                                  | Polka, Polka, Polka       | 2014 |
-|    6 | Kasalla                                 | Alle Jläser huh           | 2014 |
-|    7 | Höhner                                  | Schenk mir Dein Herz      | 2009 |
-|    8 | Paveier                                 | Leev Marie                | 2015 |
-|    9 | Kasalla                                 | Stadt met K               | 2015 |
-|   10 | Mo-Torres & Cat Ballou & Lukas Podolski | Liebe Deine Stadt         | 2016 |
+|  Rang| Interpret                               | Titel                     |  Jahr|
+|-----:|:----------------------------------------|:--------------------------|-----:|
+|     1| Brings                                  | Kölsche Jung              |  2013|
+|     2| Kasalla                                 | Pirate                    |  2011|
+|     3| Cat Ballou                              | Et jitt kei Wood          |  2012|
+|     4| Trude Herr                              | Ich will keine Schokolade |  1965|
+|     5| Brings                                  | Polka, Polka, Polka       |  2014|
+|     6| Kasalla                                 | Alle Jläser huh           |  2014|
+|     7| Höhner                                  | Schenk mir Dein Herz      |  2009|
+|     8| Paveier                                 | Leev Marie                |  2015|
+|     9| Kasalla                                 | Stadt met K               |  2015|
+|    10| Mo-Torres & Cat Ballou & Lukas Podolski | Liebe Deine Stadt         |  2016|
 
-Für alle Nicht-Karnvelisten: Das hier ist Numero Uno:
-<https://www.youtube.com/watch?v=DcNPqsWPbD8>
+Für alle Nicht-Karnvelisten: das hier ist die Nummer 1: <https://www.youtube.com/watch?v=DcNPqsWPbD8>
 
-Im nächsten Schritt analysieren wir, welche Bands die meisten Songs
-unter den Youtube-Top-100 haben.
+Im nächsten Schritt analysieren wir, welche Bands die meisten Songs unter den Youtube-Top-100 haben.
 
 ``` r
 # Berechne die Anzahl der Top 100-Lieder pro Interpret
@@ -61,16 +46,12 @@ ggplot(data_by_artist, aes(x = reorder(Interpret, number_songs), y = number_song
     geom_point(size = 2) +
     scale_y_continuous(limits = c(0, 12), breaks = c(seq(0, 12, 2))) +
     coord_flip() +
-    labs(x = NULL, y = "Anzahl an Titeln unter Top 100")
+    labs(x = NULL, y = "Anzahl an Titeln unter den Top 100")
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
-Wie zu erwarten, teilen sich die “Fööss”, Höhner und Brings Platz 1 mit
-jeweils 12 Liedern. Im nächsten Schritt schauen wir, aus welchen Jahren
-die Lieder stammen. Da das Yotube-Publikum generell jünger ist und viele
-der alten Klassiker (leider) womöglich nicht kennt, ist es zu vermuten,
-dass die meisten Songs aus den letzten 10-15 Jahren stammen.
+Wie zu erwarten, teilen sich die "Fööss", Höhner und Brings Platz 1 mit jeweils 12 Liedern. Im nächsten Schritt schauen wir, aus welchen Jahren die Lieder stammen. Da das Yotube-Publikum generell jünger ist und viele der alten Klassiker (leider) womöglich nicht kennt, ist es zu vermuten, dass die meisten Songs aus den letzten 10-15 Jahren stammen.
 
 ``` r
 # Berechne die Anzahl der Top 100-Liedern pro Jahr
@@ -86,7 +67,7 @@ ggplot(data_by_year, aes(x = Jahr, y = number_songs)) +
     labs(x = "Jahr", y = "Lieder")
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 Tatsächlich wurden die meisten Songs in den 2000ern veröffentlicht.
 
@@ -100,23 +81,23 @@ data %>%
     knitr::kable()
 ```
 
-| Jahr | Rang | Interpret         | Titel                                     |
-| ---: | ---: | :---------------- | :---------------------------------------- |
-| 1936 |   71 | Karl Berbuer      | Heidewitzka Herr Kapitän                  |
-| 1948 |   92 | Karl Berbuer      | Die Eingeborenen von Trizonesien          |
-| 1949 |   23 | Jupp Schmitz      | Wer soll das bezahlen                     |
-| 1950 |   87 | Willy Schneider   | Wenn das Wasser im Rhein goldner Wein wär |
-| 1950 |   95 | Toni Steingass    | Der schönste Platz ist immer an der Theke |
-| 1965 |    4 | Trude Herr        | Ich will keine Schokolade                 |
-| 1966 |   73 | Ernst Neger       | Humba Tätärä                              |
-| 1969 |   96 | Jupp Schmitz      | Es ist noch Suppe da                      |
-| 1970 |   79 | Margit Sponheimer | Am Rosenmontag bin ich geboren            |
-| 1971 |   16 | Bläck Fööss       | Drink doch eine met                       |
+|  Jahr|  Rang| Interpret         | Titel                                     |
+|-----:|-----:|:------------------|:------------------------------------------|
+|  1936|    71| Karl Berbuer      | Heidewitzka Herr Kapitän                  |
+|  1948|    92| Karl Berbuer      | Die Eingeborenen von Trizonesien          |
+|  1949|    23| Jupp Schmitz      | Wer soll das bezahlen                     |
+|  1950|    87| Willy Schneider   | Wenn das Wasser im Rhein goldner Wein wär |
+|  1950|    95| Toni Steingass    | Der schönste Platz ist immer an der Theke |
+|  1965|     4| Trude Herr        | Ich will keine Schokolade                 |
+|  1966|    73| Ernst Neger       | Humba Tätärä                              |
+|  1969|    96| Jupp Schmitz      | Es ist noch Suppe da                      |
+|  1970|    79| Margit Sponheimer | Am Rosenmontag bin ich geboren            |
+|  1971|    16| Bläck Fööss       | Drink doch eine met                       |
 
-## Kölsch oder Hochdeutsch?
+Kölsch oder Hochdeutsch?
+------------------------
 
-Sind die Top-Song seher auf kölsch oder hochdeutsch verfasst? Das können
-wir leicht rausfinden.
+Sind die Top-Song seher auf kölsch oder hochdeutsch verfasst? Das können wir leicht rausfinden.
 
 ``` r
 ggplot(data, aes(x = Sprache)) +
@@ -124,14 +105,9 @@ ggplot(data, aes(x = Sprache)) +
     labs(x = NULL, y = "Prozent")
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
-Kölsch überwiegt. Während 23 der 100 Songs auf hochdeutsch verfasst
-wurde, sind über drei Viertel der Lieder auf platt. In diesem Sinne:
-“[Su lang beim Lommi die Leechter noch brenne. Su lang ‘ne Funk weiß,
-wie Stippefott jeiht. Su lang dä Pitter noch schläht, dä Speimanes noch
-speit. Jo, su lang stirv dä Kölsche nit
-us.](https://www.youtube.com/watch?v=h31ksztZee4)”
+Kölsch überwiegt. Während 23 der 100 Songs auf hochdeutsch verfasst wurde, sind über drei Viertel der Lieder auf platt. In diesem Sinne: "[Su lang beim Lommi die Leechter noch brenne. Su lang ‘ne Funk weiß, wie Stippefott jeiht. Su lang dä Pitter noch schläht, dä Speimanes noch speit. Jo, su lang stirv dä Kölsche nit us.](https://www.youtube.com/watch?v=h31ksztZee4)"
 
 Nun das Ganze aufgeschlüsselt nach Bands mit über sechs Songs.
 
@@ -142,19 +118,14 @@ data %>%
     geom_bar(width = 0.2, position = position_dodge(width = 0.3)) +
     labs(x = NULL, y = "Lieder") + 
     coord_flip() +
-    guides(fill = guide_legend(reverse=T))
+    guides(fill = guide_legend(reverse = T))
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
-Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf
-platt verfasst haben, gefolgt von den Bläck Fööss Die größte Mischung
-aus Liedern auf platt und hochdeutsch haben Brings.
+Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf platt verfasst haben, gefolgt von den Bläck Fööss Die größte Mischung aus Liedern auf platt und hochdeutsch haben Brings.
 
-Haben kölsche Songs eine höhere Wahrscheinlichkeit mehr Aufrufe zu
-erhalten? Wir nutzen einen so genannten
-[t-test](https://en.wikipedia.org/wiki/Student's_t-test) und
-visualisieren die Verteilung als Boxplots.
+Haben kölsche Songs eine höhere Wahrscheinlichkeit mehr Aufrufe zu erhalten? Wir nutzen einen so genannten [t-test](https://en.wikipedia.org/wiki/Student's_t-test) und visualisieren die Verteilung als Boxplots.
 
 ``` r
 t.test(Rang ~ Sprache, data = data)
@@ -180,23 +151,14 @@ ggplot(data = data, aes(x = Sprache, y = Rang)) +
     labs(x = NULL, y = "Position in Top 100")
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-Jeder Punkt markiert ein Lied. Der Boxplot zeigt den Median-Wert beider
-Kategorien und den so genannte Quartilsabstand (in diesem Bereich liegen
-50 Prozent der Songs in der jeweiligen Kategorie). Kölsche Songs haben
-einen geringeren Medianwert, was darauf schließen lässt, dass kölsche
-Lieder weiter Oben auf der Liste stehen. Der obige T-test zeigt jedoch,
-dass der Unterschied nicht statistisch signifikant ist.
+Jeder Punkt markiert ein Lied. Der Boxplot zeigt den Median-Wert beider Kategorien und den so genannte Quartilsabstand (in diesem Bereich liegen 50 Prozent der Songs in der jeweiligen Kategorie). Kölsche Songs haben einen geringeren Medianwert, was darauf schließen lässt, dass kölsche Lieder weiter Oben auf der Liste stehen. Der obige T-test zeigt jedoch, dass der Unterschied nicht statistisch signifikant ist.
 
-## Eine automatische Dialekt-Klassifikation
+Eine automatische Dialekt-Klassifikation
+----------------------------------------
 
-Ist es möglich, anhand der Worthäufigkeiten automatisch zu ermitteln, ob
-ein Lied auf hochdeutsch oder kölsch verfasst ist? Um das
-herauszufinden, habe ich einen Naive Bayes-Klassifizierer erstellt. Die
-Idee ist einfach: Für die ersten 50 Songs nennen wir die Sprache und
-ermitteln, wie gut die automatische Klassifikation für die restlichen
-Titel funktioniert.
+Ist es möglich, anhand der Worthäufigkeiten automatisch zu ermitteln, ob ein Lied auf hochdeutsch oder kölsch verfasst ist? Um das herauszufinden, habe ich einen Naive Bayes-Klassifizierer erstellt. Die Idee ist einfach: Für die ersten 50 Songs nennen wir die Sprache und ermitteln, wie gut die automatische Klassifikation für die restlichen Titel funktioniert.
 
 ``` r
 # Splitte Daten in Training- und Testset
@@ -237,14 +199,7 @@ summary(nb_classifier)
     ## Hochdeutsch 0.1143 0.3348 0.5571 0.2954    0.5571 0.1436 0.5571
     ## Kölsch      0.8857 0.6652 0.4429 0.7046    0.4429 0.8564 0.4429
 
-Die “Estimated Feature Scores” zeigen uns die Wahrscheinlichkeit für
-jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört.
-Beispielsweise ist der Unterschied bei “oh” sehr gering (52-prozentige
-Wahrscheinlichekeit für “Kölsch”, 47-prozentige Wahrscheinlichkeit für
-“Hochdeutsch”). Auf der anderen Seite haben Worte wie “dat”, “wor”,
-“nit” eine viel höhere Wahrscheinlichkeit, in kölschen Liedern
-vorzukommen. Diese Informationen werden genutzt, um die Sprache der
-restlichen Lieder vorherzusagen.
+Die "Estimated Feature Scores" zeigen uns die Wahrscheinlichkeit für jedes der Worte, ob es eher zu Kölsch oder Hochdeutsch gehört. Beispielsweise ist der Unterschied bei "oh" sehr gering (52-prozentige Wahrscheinlichekeit für "Kölsch", 47-prozentige Wahrscheinlichkeit für "Hochdeutsch"). Auf der anderen Seite haben Worte wie "dat", "wor", "nit" eine viel höhere Wahrscheinlichkeit, in kölschen Liedern vorzukommen. Diese Informationen werden genutzt, um die Sprache der restlichen Lieder vorherzusagen.
 
 ``` r
 # Erstelle Test-dfm
@@ -266,14 +221,12 @@ table(actual_language = docvars(corpus_test, "Sprache"),
     ##     Hochdeutsch          18      0
     ##     Kölsch                0     32
 
-Die Klassifikation klappt perfekt\! Mit nur 50 annotierten Liedern kann
-die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden\!
+Die Klassifikation funktioniert perfekt. Mit nur 50 annotierten Liedern kann die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden.
 
-## Quantitative Textanalyse
+Quantitative Textanalyse
+------------------------
 
-Im nächsten Schritt geht es ans Eingemachte: wir schauen uns die Inhalte
-der Songtexte an. Zunächst erstellen wir dafür mit dem
-**quanteda**-Package einen Textkorpus.
+Im nächsten Schritt geht es ans Eingemachte: wir schauen uns die Inhalte der Songtexte an. Zunächst erstellen wir dafür mit dem **quanteda**-Package einen Textkorpus.
 
 ``` r
 # Erstelle Text-Korpus des data frames
@@ -289,9 +242,7 @@ docnames(corpus_leeder) <- paste(docvars(corpus_leeder, "title_short"),
                                  docvars(corpus_leeder, "Jahr"), sep = ", ")
 ```
 
-Nun nutzen wir die Keyword-in-Context-Funktion, um zu schauen, in
-welchen Zusammenhängen die Worte “fiere”, “drink” und “alaaf” vorkommen.
-Hierbei wird nicht zwischen Groß- und Kleinschreibung unterschieden.
+Nun nutzen wir die Keyword-in-Context-Funktion, um zu schauen, in welchen Zusammenhängen die Worte "fiere" (feiern), "drink" und "alaaf" vorkommen. Hierbei wird nicht zwischen Groß- und Kleinschreibung unterschieden.
 
 ``` r
 # Keyword-in-Context-Analyse
@@ -338,12 +289,9 @@ corpus_leeder %>%
     ##  [Denn wen, 1993, 122]   Kölle Alaaf |  Alaaf  | Kölle Alaaf     
     ##  [Denn wen, 1993, 124]   Alaaf Kölle |  Alaaf  |
 
-Was sagt uns diese Tabelle: Die Kölner lieben das “Alaaf” und trinken
-sehr gerne. Und in vielen Texten wiederholt sich eine Phrase
-(Refrain\!).
+Was sagt uns diese Tabelle: Die Kölner lieben das "Alaaf" und trinken sehr gerne. Und in vielen Texten wiederholt sich eine Phrase (Refrain!).
 
-Im nächsten Schritt plotten wir die 40 häufigsten Begriffe über alle
-Lieder hinweg.
+Im nächsten Schritt plotten wir die 40 häufigsten Begriffe über alle Lieder hinweg.
 
 ``` r
 # Erstelle dfm, entferne deutsche Stopwörter, Nummern und Punktuation
@@ -360,22 +308,14 @@ ggplot(most_frequent_words, aes(x = reorder(feature, frequency), y = frequency))
     labs(x = NULL, y = "Häufigkeit")
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
-Die Kölner sprechen gerne über sich (“mer”, “ming”, “sin”) und ihre
-Stadt (“kölle”, “kölsche”, “stadt”). Allerdings befinden sich unter den
-Worten immer noch viele Pronomen, Artikel und Füllwörter. Deshalb gehen
-wir im nächsten Abschnitt einen Schritt weiter und untersuchen, wie sich
-die Wortwahl der Interpreten unterscheidet.
+Die Kölner sprechen gerne über sich ("mer", "ming", "sin") und ihre Stadt ("kölle", "kölsche", "stadt"). Allerdings befinden sich unter den Worten immer noch viele Pronomen, Artikel und Füllwörter. Deshalb gehen wir im nächsten Abschnitt einen Schritt weiter und untersuchen, wie sich die Wortwahl der Interpreten unterscheidet.
 
-## Wordclouds
+Wordclouds
+----------
 
-Als nächstes fokussieren wir uns auf die Interpreten, die mit mindestens
-sechs Titeln vertreten sind und erstellen eine Wordcloud basierend auf
-den [tf-idf-Werten](https://de.wikipedia.org/wiki/Tf-idf-Maß). Grob
-gesprochen stellt tf-idf diejenigen Begriffe hervor, die von dem
-jeweiligen Interpreten überproportional vorkommen (verglichen mit allen
-anderen Interpreten).
+Als nächstes fokussieren wir uns auf die Interpreten, die mit mindestens sechs Titeln vertreten sind und erstellen eine Wordcloud basierend auf den [tf-idf-Werten](https://de.wikipedia.org/wiki/Tf-idf-Maß). Grob gesprochen stellt tf-idf diejenigen Begriffe hervor, die von dem jeweiligen Interpreten überproportional vorkommen (verglichen mit allen anderen Interpreten).
 
 ``` r
 # Nur Gruppen mit mehr als sechs Liedern
@@ -391,23 +331,14 @@ corpus_leeder_subset_wordcloud %>%
     textplot_wordcloud(comparison = TRUE, max_words = 70)
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
-Eins fällt auf: manche Lieder haben einen großen Einfluss,
-beispielsweise “Dausend Levve” bei Kasalla, “Op de Maat” (Räuber),
-“Polka, Polka, Polka” (Bläck Fööss) und “Pizza Wunderbar” (Pizza).
-Denn die Inhalte dieser Lieder unterscheiden sich sehr von den Titeln
-der anderen Bands (und beinhalten sich wiederholende Schlagwörter).
+Eins fällt auf: manche Lieder haben einen großen Einfluss, beispielsweise "Dausend Levve" bei Kasalla, "Op de Maat" (Räuber), "Polka, Polka, Polka" (Bläck Fööss) und "Pizza Wunderbar" (Pizza). Denn die Inhalte dieser Lieder unterscheiden sich sehr von den Titeln der anderen Bands (und beinhalten sich wiederholende Schlagwörter).
 
-## Wordfish für Karnevalsbands
+Wordfish für Karnevalsbands
+---------------------------
 
-Abschließend ein Experiment: Wir nutzen die Scaling-Methode “Wordfish”
-([Slapin and
-Proksch 2008](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)),
-um alle Bands mit mehr als zwei Songs auf einer eindimensionalen Ebene
-zu skalieren. Normalerweise wird diese Methode genutzt, um Parteien auf
-der Links-Rechts-Ebene einzuordnen. Hier vermuten wir eine (uns vorerst
-unbekannte) Karnevalsdimension (natürlich mit Vorsicht zu genießen\!).
+Abschließend ein Experiment: Wir nutzen die Scaling-Methode "Wordfish" ([Slapin and Proksch 2008](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)), um alle Bands mit mehr als zwei Songs auf einer eindimensionalen Ebene zu skalieren. Normalerweise wird diese Methode genutzt, um Parteien auf der Links-Rechts-Ebene einzuordnen. Hier vermuten wir eine (uns vorerst unbekannte) Karnevalsdimension (natürlich mit Vorsicht zu genießen!).
 
 ``` r
 corpus_leeder_subset <- corpus_leeder %>% 
@@ -422,45 +353,26 @@ textmodel_wordfish(dfm_leeder_subset) %>%
     theme_minimal()
 ```
 
-![](fastelovend_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](fastelovend_files/figure-markdown_github/unnamed-chunk-16-1.png)
 
-Die Dimension macht aber durchaus Sinn: es geht um platt
-vs. hochdeutsch\! Während Bands wie Miljö, Kasalla, Querbeat und Cat
-Ballou fast ausschließlich auf kölsch singen (zumindest deren Songs in
-den Top 100), singen u.a. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd
-Stelter auf hochdeutsch. Interessanterweise liegen Brings, Höhner und
-Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere
-sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn\!
-Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten.
-Allerdings besteht diese Analyse nur aus 100, meist kurzen, Liedtexten.
-Um ein besseres Verständnis zu bekommen, brauchen wir mehr Lieder pro
-Band. Dann könnten wir auch besser verstehen, warum z.B. die Fööss nicht
-mehr in der kölsch-Dimension auftauchen. Mit der momentanen Analyse kann
-auch die unterschiedliche Textlänger (mehr Songs der Höhner, Bläck Fööss
-und Brings) einen Einfluss auf die Skalierung haben. Deshalb gilt auch
-hier: more research is required.
+Die Dimension macht aber durchaus Sinn: es geht um platt vs. hochdeutsch! Während Bands wie Miljö, Kasalla, Querbeat und Cat Ballou fast ausschließlich auf kölsch singen (zumindest deren Songs in den Top 100), singen u.a. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd Stelter auf hochdeutsch. Interessanterweise liegen Brings, Höhner und Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn! Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten. Allerdings besteht diese Analyse nur aus 100, meist kurzen, Liedtexten. Um ein besseres Verständnis zu bekommen, brauchen wir mehr Lieder pro Band. Dann könnten wir auch besser verstehen, warum z.B. die Fööss nicht mehr in der kölsch-Dimension auftauchen. Mit der momentanen Analyse kann auch die unterschiedliche Textlänger (mehr Songs der Höhner, Bläck Fööss und Brings) einen Einfluss auf die Skalierung haben. Deshalb gilt auch hier: more research is required.
 
-Für mehr Informationen zu Wordfish siehe: Jonathan Slapin and
-Sven-Oliver Proksch. 2008. “[A Scaling Model for Estimating Time-Series
-Party Positions from
-Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)”
-American Journal of Political Science 52(3):705-772.
+Für mehr Informationen zu Wordfish siehe: Jonathan B. Slapin and Sven-Oliver Proksch. 2008. "[A Scaling Model for Estimating Time-Series Party Positions from Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)" *American Journal of Political Science* 52(3):705-772.
 
-## Weiterführende Informationen
+Weiterführende Informationen
+----------------------------
 
-Habe ich Interesse an unserem **quanteda**-Package geweckt? Hier gibt es
-mehr Informationen:
+Habe ich Interesse an unserem **quanteda**-Package geweckt? Hier gibt es mehr Informationen:
 
-  - Website: [quanteda.io](https://www.quanteda.io)
-  - Tutorials: [tutorials.quanteda.io](https://tutorials.quanteda.io)
-  - Quanteda Initiative: [quanteda.org](https://tutorials.org)
+-   Website: [quanteda.io](https://www.quanteda.io)
+-   Tutorials: [tutorials.quanteda.io](https://tutorials.quanteda.io)
+-   Quanteda Initiative: [quanteda.org](https://tutorials.org)
 
-Die folgende Version von **quanteda** wurde für diese aktualisierte
-Version der Einführung genutzt.
+Die folgende Version von **quanteda** wurde für diese aktualisierte Version der Einführung genutzt.
 
 ``` r
 cat(paste("Dieses Tutorium wurde mit quanteda Version", 
     packageVersion("quanteda"), "erstellt."))
 ```
 
-    ## Dieses Tutorium wurde mit quanteda Version 1.3.15 erstellt.
+    ## Dieses Tutorium wurde mit quanteda Version 1.4.0 erstellt.

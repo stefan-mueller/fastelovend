@@ -8,7 +8,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Die Website [karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html) hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube gespielten kölschen Karnevalslieder zu finden Die Tabelle findet sich [hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige ich, welche Bands am häufigsten vertreten sind, wie sich die Wortwahl unterscheidet, und ob man mitteils eines "trainierten" Klassifikator ermitteln kann, ob ein Song auf hochdeutsch oder kölsch geschrieben wurde. Gleichzeitig gebe gleichzeitig noch einen Einblick in quantitative Textanalyse mit unserem [**quanteda**](www.quanteda.io)-Package. Visualisierungen und Data Wrangling wurde mit der [**tidyverse**](www.tidyverse.org) durchgeführt.
+Die Website [karnevalslieder.koeln](http://www.karnevalslieder.koeln/top-100.html) hat sich den Aufwand gemacht, die am 100 häufigsten auf Youtube gespielten kölschen Karnevalslieder zu finden Die Tabelle findet sich [hier](www.karnevalslieder.koeln). Um zwei meiner Hobbies (Karneval und quantitative Textanalyse) zu verknüpfen, habe ich einen Textkorpus erstellt, der alle Songtexte dieser Top-100-Songs enthält. Hier zeige ich, welche Bands am häufigsten vertreten sind, wie sich die Wortwahl unterscheidet, und ob man mitteils eines "trainierten" Klassifikators ermitteln kann, ob ein Song auf hochdeutsch oder kölsch geschrieben wurde. Gleichzeitig gebe gleichzeitig noch einen Einblick in quantitative Textanalyse mit unserem [**quanteda**](www.quanteda.io)-Package. Visualisierungen und Data Wrangling wurde mit der [**tidyverse**](www.tidyverse.org) durchgeführt.
 
 ## Beschreibende Statistiken 
 
@@ -37,7 +37,7 @@ data %>%
     knitr::kable()
 ```
 
-Für alle Nicht-Karnvelisten: Das hier ist Numero Uno: https://www.youtube.com/watch?v=DcNPqsWPbD8
+Für alle Nicht-Karnvelisten: das hier ist die Nummer 1: https://www.youtube.com/watch?v=DcNPqsWPbD8
 
 Im nächsten Schritt analysieren wir, welche Bands die meisten Songs unter den Youtube-Top-100 haben.
 
@@ -54,7 +54,7 @@ ggplot(data_by_artist, aes(x = reorder(Interpret, number_songs), y = number_song
     geom_point(size = 2) +
     scale_y_continuous(limits = c(0, 12), breaks = c(seq(0, 12, 2))) +
     coord_flip() +
-    labs(x = NULL, y = "Anzahl an Titeln unter Top 100")
+    labs(x = NULL, y = "Anzahl an Titeln unter den Top 100")
 ```
 
 Wie zu erwarten, teilen sich die "Fööss", Höhner und Brings Platz 1 mit jeweils 12 Liedern. Im nächsten Schritt schauen wir, aus welchen Jahren die Lieder stammen. Da das Yotube-Publikum generell jünger ist und viele der alten Klassiker (leider) womöglich nicht kennt, ist es zu vermuten, dass die meisten Songs aus den letzten 10-15 Jahren stammen.
@@ -96,8 +96,7 @@ ggplot(data, aes(x = Sprache)) +
     labs(x = NULL, y = "Prozent")
 ```
 
-Kölsch überwiegt. Während 23 der 100 Songs auf hochdeutsch verfasst wurde, sind über drei Viertel der Lieder auf platt. In diesem Sinne: "[Su lang beim Lommi die Leechter noch brenne. Su lang ‘ne Funk weiß, wie Stippefott jeiht. Su lang dä Pitter noch schläht, dä Speimanes noch speit.
-Jo, su lang stirv dä Kölsche nit us.](https://www.youtube.com/watch?v=h31ksztZee4)"
+Kölsch überwiegt. Während 23 der 100 Songs auf hochdeutsch verfasst wurde, sind über drei Viertel der Lieder auf platt. In diesem Sinne: "[Su lang beim Lommi die Leechter noch brenne. Su lang ‘ne Funk weiß, wie Stippefott jeiht. Su lang dä Pitter noch schläht, dä Speimanes noch speit. Jo, su lang stirv dä Kölsche nit us.](https://www.youtube.com/watch?v=h31ksztZee4)"
 
 
 Nun das Ganze aufgeschlüsselt nach Bands mit über sechs Songs.
@@ -109,7 +108,7 @@ data %>%
     geom_bar(width = 0.2, position = position_dodge(width = 0.3)) +
     labs(x = NULL, y = "Lieder") + 
     coord_flip() +
-    guides(fill = guide_legend(reverse=T))
+    guides(fill = guide_legend(reverse = T))
 ```
 
 Kasalla ist die einzige Band, die alle Lieder aus dem Datensatz auf platt verfasst haben, gefolgt von den Bläck Fööss Die größte Mischung aus Liedern auf platt und hochdeutsch haben Brings.
@@ -170,7 +169,7 @@ table(actual_language = docvars(corpus_test, "Sprache"),
 ```
 
 
-Die Klassifikation klappt perfekt! Mit nur 50 annotierten Liedern kann die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden!
+Die Klassifikation funktioniert perfekt. Mit nur 50 annotierten Liedern kann die Sprache der restlichen Lieder fehlerfrei vorhergesagt werden.
 
 
 ## Quantitative Textanalyse
@@ -187,7 +186,7 @@ docnames(corpus_leeder) <- paste(docvars(corpus_leeder, "title_short"),
                                  docvars(corpus_leeder, "Jahr"), sep = ", ")
 ```
 
-Nun nutzen wir die Keyword-in-Context-Funktion, um zu schauen, in welchen Zusammenhängen die Worte "fiere", "drink" und "alaaf" vorkommen. Hierbei wird nicht zwischen Groß- und Kleinschreibung unterschieden.
+Nun nutzen wir die Keyword-in-Context-Funktion, um zu schauen, in welchen Zusammenhängen die Worte "fiere" (feiern), "drink" und "alaaf" vorkommen. Hierbei wird nicht zwischen Groß- und Kleinschreibung unterschieden.
 
 
 ```{r}
@@ -258,7 +257,8 @@ textmodel_wordfish(dfm_leeder_subset) %>%
 
 Die Dimension macht aber durchaus Sinn: es geht um platt vs. hochdeutsch! Während Bands wie Miljö, Kasalla, Querbeat und Cat Ballou fast ausschließlich auf kölsch singen (zumindest deren Songs in den Top 100), singen u.a. Trude Herr, Karl Berbuer, Jupp Schmitz, Bernd Stelter auf hochdeutsch. Interessanterweise liegen Brings, Höhner und Bläck Fööss in der Mitte, denn Teile der Songs sind hochdeutsch, andere sind platt. Wer hätte das gedacht: Wordfish für Fastelovend macht Sinn! Und diese Skalierung basierend ausschließlich auf Worthäufigkeiten. Allerdings besteht diese Analyse nur aus 100, meist kurzen, Liedtexten. Um ein besseres Verständnis zu bekommen, brauchen wir mehr Lieder pro Band. Dann  könnten wir auch besser verstehen, warum z.B. die Fööss nicht mehr in der kölsch-Dimension auftauchen. Mit der momentanen Analyse kann auch die unterschiedliche Textlänger (mehr Songs der Höhner, Bläck Fööss und Brings) einen Einfluss auf die Skalierung haben. Deshalb gilt auch hier: more research is required.
 
-Für mehr Informationen zu Wordfish siehe: Jonathan Slapin and Sven-Oliver Proksch. 2008. "[A Scaling Model for Estimating Time-Series Party Positions from Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)" American Journal of Political Science 52(3):705-772.
+Für mehr Informationen zu Wordfish siehe: 
+Jonathan B. Slapin and Sven-Oliver Proksch. 2008. "[A Scaling Model for Estimating Time-Series Party Positions from Texts.](http://www.svenoliverproksch.com/uploads/1/2/9/8/12985397/slapin_proksch_ajps_2008.pdf)" _American Journal of Political Science_ 52(3):705-772.
 
 ## Weiterführende Informationen
 
